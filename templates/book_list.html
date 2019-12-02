@@ -1,142 +1,150 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Title</title>
-    <script src="https://cdn.bootcss.com/jquery/3.4.1/jquery.min.js"></script>
-    {% load static %}
-    <link rel="stylesheet" href="{% static 'bootstrap/css/bootstrap.min.css' %}">
-    <script src="{% static 'bootstrap/js/bootstrap.min.js' %}"></script>
-</head>
-<body>
+{% extends 'home.html' %}
 
-{#导航条#}
-<nav class="navbar navbar-inverse">
-  <div class="container-fluid">
-    <!-- Brand and toggle get grouped for better mobile display -->
-    <div class="navbar-header">
-      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1" aria-expanded="false">
-        <span class="sr-only">Toggle navigation</span>
-        <span class="icon-bar"></span>
-        <span class="icon-bar"></span>
-        <span class="icon-bar"></span>
-      </button>
-      <a class="navbar-brand" href="/book_list/">Home</a>
-    </div>
-    <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
-      <ul class="nav navbar-nav">
-        <li><a href="/publisher_list/">出版社列表</a></li>
-        <li><a href="/author_list/">作者列表</a></li>
-        <li class="dropdown"></li>
-      </ul>
-      <form class="navbar-form navbar-left">
-      </form>
-      <ul class="nav navbar-nav navbar-right">
-        <li><a href="/login/">登录 / 注册</a></li>
-        <li class="dropdown">
-          <ul class="dropdown-menu">
-            <li><a href="#">Action</a></li>
-            <li><a href="#">Another action</a></li>
-            <li><a href="#">Something else here</a></li>
-            <li role="separator" class="divider"></li>
-            <li><a href="#">Separated link</a></li>
-          </ul>
-        </li>
-      </ul>
-    </div><!-- /.navbar-collapse -->
-  </div><!-- /.container-fluid -->
-</nav>
+
+{% block content %}
+    <style>
+    div.sweet-alert h2 {
+        padding: 10px;
+    }
+    </style>
+
+    {#            面板开始  #}
+    <div class="panel panel-primary">
+        <div class="panel-heading ">
+            <h3 class="panel-title">图书管理系统 <span class="glyphicon glyphicon-book pull-right"></span></h3>
+        </div>
+        <div class="panel-body">
+            {% block panel %}
+                <!--搜索按钮-->
+                <form class="form-inline">
+                    <div class="form-group">
+                        <label class="sr-only" for="exampleInputAmount">搜索</label>
+                        <div class="input-group">
+                            <input type="text" class="form-control" id="exampleInputAmount" placeholder="搜索">
+                        </div>
+                    </div>
+
+
+                    <button type="submit" class="btn btn-primary">搜索</button>
+                    {% block table %}
+                        <!--新增按钮-->
+                        <a href="{% url 'add_book' %}" class="btn btn-success pull-right">新增</a>
+                        </form>
+
+                        <br>
+
+
+                        {#                表格开始#}
 
 
 
+                        <table class="table-hover table table-bordered table-striped">
+                            <thead>
+                            <tr>
+                                <th>序号</th>
+                                <th>书名</th>
+                                <th>价格</th>
+                                <th>发布日期</th>
+                                <th>出版社</th>
+                                <th>作者</th>
+                                <th class="text-center">操作</th>
+                            </tr>
 
-<div class="container">
-    <div class="row">
-        <div class="col-md-8 col-md-offset-2">
-
-                                <div class="panel panel-primary">
-                          <div class="panel panel-heading panel-primary text-center ">图书管理系统-图书列表
-                                    <span class="glyphicon glyphicon-book pull-right"></span>
-                          </div>
-
-                                    <div class="panel-body">
-
-
-                                <!--搜索按钮-->
-                                  <form class="form-inline">
-                                      <div class="form-group">
-                                        <label class="sr-only" for="exampleInputAmount">搜索</label>
-                                        <div class="input-group">
-                                          <input type="text" class="form-control" id="exampleInputAmount" placeholder="搜索">
-                                        </div>
-                                      </div>
-
-                                      <button type="submit" class="btn btn-primary">搜索</button>
-                                  <!--新增按钮-->
-                                  <a href="/add_book/" class="btn btn-success pull-right">新增</a>
-                                    </form>
-
-                                        <br>
+                            </thead>
 
 
-
-                          <table class="table-hover table-bordered table-striped table">
-                                    <thead>
-                                        <tr>
-                                            <th>序号</th>
-                                            <th>书名</th>
-                                            <th>出版社</th>
-{#                                            <th>作者</th>#}
-                                            <th>操作</th>
-                                        </tr>
-                                    </thead>
-
-                                    <tbody>
-                                        {% for book in book_list %}
-                                            <tr>
-                                                <td>{{ book.id }}</td>
-                                                <td>{{ book.name }}</td>
-                                                <td>{{ book.publisher.name }}</td>
-{#                                                <td>{{ book.author.name }}</td>#}
-                                                <td class="text-center">
-                                                    <a href="/edit_book/?book_id={{ book.id }}" class="btn btn-primary">编辑</a>
-                                                    <a href="/del_book/?book_id={{ book.id }}" class="btn btn-danger" onclick="return confirm('是否确认删除')">删除</a>
-                                                </td>
-                                            </tr>
+                            <tbody>
+                            {% for book_obj in page_queryset %}
+                                <tr>
+                                    <td>{{ forloop.counter }}</td>
+                                    <td>{{ book_obj.title }}</td>
+                                    <td>{{ book_obj.price }}</td>
+                                    <td>{{ book_obj.publish_date|date:'Y-m-d' }}</td>
+                                    <td>{{ book_obj.publish.name }}</td>
+                                    <td>
+                                        {% for book in book_obj.authors.all %}
+                                            {% if forloop.last %}
+                                                <span>{{ book.name }}</span>
+                                            {% else %}
+                                                <span>{{ book.name }},</span>
+                                            {% endif %}
                                         {% endfor %}
 
-                                    </tbody>
-                                </table>
+                                    </td>
+
+                                    <td class="text-center">
+                                        <a href="{% url 'edit_book' book_obj.id %}" class="btn btn-primary">编辑</a>
+                                        {#                                <a href="#" onclick="return confirm('是否要删除？')" class="btn btn-danger">删除</a>#}
+                                        {#                                <a href="{% url 'delete_book' book_obj.pk %}" onclick="return confirm('是否要删除？')" class="btn btn-danger">删除</a>#}
+                                        {#                                添加一个属性#}
+                                        <a href="#" class="btn btn-danger del" delete_id="{{ book_obj.id }}">删除</a>
+                                    </td>
+                                </tr>
+                            {% empty %}
+                                <tr>
+                                    <h3>暂无书籍！，请添加书籍</h3>
+                                </tr>
+
+                            {% endfor %}
+                            </tbody>
 
 
+                        </table>
+                        {#      表格结束#}
+                    {% endblock %}
 
-{#                                        分页开始#}
-                                    <nav aria-label="Page navigation" class="text-center">
-                                          <ul class="pagination">
-                                            <li>
-                                              <a href="#" aria-label="Previous">
-                                                <span aria-hidden="true">&laquo;</span>
-                                              </a>
-                                            </li>
-                                            <li><a href="#">1</a></li>
-                                            <li><a href="#">2</a></li>
-                                            <li><a href="#">3</a></li>
-                                            <li><a href="#">4</a></li>
-                                            <li><a href="#">5</a></li>
-                                            <li>
-                                              <a href="#" aria-label="Next">
-                                                <span aria-hidden="true">&raquo;</span>
-                                              </a>
-                                            </li>
-                                          </ul>
-                                        </nav>
-{#                                    分页结束#}
-
-                      </div>
-                    </div>
+                {#                                分页开始#}
+                <span class="text-center">{{ page_obj.page_html|safe }}</span>
+                {#                                    分页结束#}
+            {% endblock %}
 
         </div>
     </div>
-</div>
-</body>
-</html>
+    {#            面板结束  #}
+
+
+<script>
+    $(".del").click(function () {
+        {#先拿到当前被点击的对象#}
+        var $btn = $(this);
+        {#去找删除按钮效果代码 #}
+        swal({
+                title: "你确定?",
+                text: "你如果删除了，你就准备跑路吧",
+                type: "warning",
+                showCancelButton: true,
+                confirmButtonClass: "btn-danger",
+                confirmButtonText: "确定",
+                cancelButtonText: "取消",
+                closeOnConfirm: false,
+                closeOnCancel: false,
+                {#让操作有个延时的...的操作#}
+                showLoaderOnConfirm: true
+            },
+            function (isConfirm) {
+                if (isConfirm) {
+                    {#朝后端发送ajax请求 做一些操作#}
+                    $.ajax({
+                        url:'',
+                        type:'post',
+                        data:{'delete_id':$btn.attr('delete_id')},
+                        success:function (data) {
+                            if (data.code==200){
+                                swal("准备跑路吧", data.msg, "success");
+                                {#通过DOM操作，操作标签 移除标签#}
+                                $btn.parent().parent().remove()
+
+                            } else {
+                                swal("Error", "出现了未知Bug", "warning");
+                            }
+                        }
+                    });
+                } else {
+                    swal("取消", "我怂了)", "error");
+                }
+            });
+    })
+</script>
+
+{% endblock %}
+

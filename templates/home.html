@@ -6,14 +6,15 @@
     <script src="https://cdn.bootcss.com/jquery/3.4.1/jquery.min.js"></script>
     {% load static %}
     <link rel="stylesheet" href="{% static 'bootstrap/css/bootstrap.min.css' %}">
+    <link rel="stylesheet" href="{% static 'dist/sweetalert.css' %}">
     <script src="{% static 'bootstrap/js/bootstrap.min.js' %}"></script>
+    <script src="{% static 'dist/sweetalert.min.js' %}"></script>
 </head>
 <body>
 
 {#导航条#}
 <nav class="navbar navbar-inverse">
   <div class="container-fluid">
-    <!-- Brand and toggle get grouped for better mobile display -->
     <div class="navbar-header">
       <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1" aria-expanded="false">
         <span class="sr-only">Toggle navigation</span>
@@ -21,18 +22,18 @@
         <span class="icon-bar"></span>
         <span class="icon-bar"></span>
       </button>
-      <a class="navbar-brand" href="/book_list/">Home</a>
+      <a class="navbar-brand" href="{% url 'home' %}">Home</a>
     </div>
     <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
       <ul class="nav navbar-nav">
-        <li><a href="/publisher_list/">出版社列表</a></li>
-        <li><a href="/author_list/">作者列表</a></li>
+{#        <li><a href="#">用户列表</a></li>#}
+{#        <li><a href="#">作者列表</a></li>#}
         <li class="dropdown"></li>
       </ul>
       <form class="navbar-form navbar-left">
       </form>
       <ul class="nav navbar-nav navbar-right">
-        <li><a href="/login/">登录 / 注册</a></li>
+        <li><a href="{% url 'login' %}">登录 / 注册</a></li>
         <li class="dropdown">
           <ul class="dropdown-menu">
             <li><a href="#">Action</a></li>
@@ -52,28 +53,24 @@
 
 <div class="container">
     <div class="row">
-        <div class="col-md-8 col-md-offset-2">
+    <div class="col-md-2">
 
-                                <div class="panel panel-primary">
-                          <div class="panel panel-heading panel-primary text-center ">添加出版社
-                                    <span class="glyphicon glyphicon-book pull-right"></span>
-                          </div>
+            <div class="list-group">
+          <a href="#" class="list-group-item active">
+            图书管理系统 <span class="glyphicon glyphicon-book pull-right"></span>
+          </a>
+          <a href="{% url 'home' %}" class="list-group-item">首页</a>
+          <a href="{% url 'book_list' %}" class="list-group-item">图书列表</a>
+          <a href="{% url 'publish_list' %}" class="list-group-item">出版社列表</a>
+          <a href="#" class="list-group-item">作者列表</a>
+        </div>
 
-                                    <div class="panel-body">
-                                        <form action="" method="post" class="form-horizontal">
-                                            <p>
-                                                出版社名称：<input type="text" class="form-control" name="publisher_name" placeholder="出版社名称">
-                                            </p>
-                                            <p>
-                                                <input type="submit" value="提交" class="btn-success btn">
-                                            </p>
-                                        </form>
+    </div>
 
-
-
-                                    </div>
-                    </div>
-
+        <div class="col-md-10">
+            {% block content %}
+                <h1 class="text-center">欢迎来到后台管理系统！</h1>
+            {% endblock %}
         </div>
     </div>
 </div>

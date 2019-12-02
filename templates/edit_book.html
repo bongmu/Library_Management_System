@@ -1,85 +1,47 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Title</title>
-    <script src="https://cdn.bootcss.com/jquery/3.4.1/jquery.min.js"></script>
-    {% load static %}
-    <link rel="stylesheet" href="{% static 'bootstrap/css/bootstrap.min.css' %}">
-    <script src="{% static 'bootstrap/js/bootstrap.min.js' %}"></script>
-</head>
-<body>
-
-{#导航条#}
-<nav class="navbar navbar-inverse">
-  <div class="container-fluid">
-    <!-- Brand and toggle get grouped for better mobile display -->
-    <div class="navbar-header">
-      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1" aria-expanded="false">
-        <span class="sr-only">Toggle navigation</span>
-        <span class="icon-bar"></span>
-        <span class="icon-bar"></span>
-        <span class="icon-bar"></span>
-      </button>
-      <a class="navbar-brand" href="/book_list/">Home</a>
-    </div>
-    <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
-      <ul class="nav navbar-nav">
-        <li><a href="/publisher_list/">出版社列表</a></li>
-        <li><a href="/author_list/">作者列表</a></li>
-        <li class="dropdown"></li>
-      </ul>
-      <form class="navbar-form navbar-left">
-      </form>
-      <ul class="nav navbar-nav navbar-right">
-        <li><a href="/login/">登录 / 注册</a></li>
-        <li class="dropdown">
-          <ul class="dropdown-menu">
-            <li><a href="#">Action</a></li>
-            <li><a href="#">Another action</a></li>
-            <li><a href="#">Something else here</a></li>
-            <li role="separator" class="divider"></li>
-            <li><a href="#">Separated link</a></li>
-          </ul>
-        </li>
-      </ul>
-    </div><!-- /.navbar-collapse -->
-  </div><!-- /.container-fluid -->
-</nav>
+{% extends 'add_book.html' %}
 
 
+{% block panel %}
 
 
-<div class="container">
-    <div class="row">
-        <div class="col-md-8 col-md-offset-2">
-
-                                <div class="panel panel-primary">
-                          <div class="panel panel-heading panel-primary text-center ">编辑图书信息
-                                    <span class="glyphicon glyphicon-book pull-right"></span>
-                          </div>
-
-                                    <div class="panel-body">
+        <div class="panel-body">
                                         <form action="" method="post" class="form-horizontal">
                                             <p>
-                                                图书名称：<input type="text" class="form-control" name="book_name" value="{{ book_obj.name }}">
+                                                图书名称：<input type="text" class="form-control" name="book_name" value="{{ book_obj.title }}">
                                             </p>
-
+                                            <p>
+                                                图书价格：<input type="text" class="form-control" name="book_price" value="{{ book_obj.price }}">
+                                            </p>
                                             <p>
                                                 所属出版社：
-                                                <select name="publisher_id" class="form-control">
-                                                    <option value="--请选择出版社--">--请选择出版社--</option>
-                                                    {% for publisher in publisher_list %}
-                                                        {% if publisher == book_obj.publisher %}
-                                                            <option value="{{ publisher.id }}"  selected="selected">{{ publisher.name }}</option>
+                                                <select name="publish_id" class="form-control">
+                                                    <option value="--请选择出版社--" selected="selected">--请选择出版社--</option>
+                                                    {% for publish_obj in publish_list %}
+                                                        {% if book_obj.publish == publish_obj %}
+                                                            <option value="{{ publish_obj.id }}" selected>{{ publish_obj.name }}</option>
                                                         {% else %}
-                                                            <option value="{{ publisher.id }}">{{ publisher.name }}</option>
+                                                            <option value="{{ publish_obj.id }}">{{ publish_obj.name }}</option>
                                                         {% endif %}
-
+                                                    {% empty %}
+                                                        <option>没有出版社</option>
                                                     {% endfor %}
                                                 </select>
                                             </p>
-
+                                            <p>
+                                                作者：
+                                                <select name="author_id" class="form-control" multiple>
+                                                    {% for author_obj in author_list %}
+                                                        {% if author_obj in book_obj.authors.all %}
+                                                            <option value="{{ author_obj.id }}" selected>{{ author_obj.name }}</option>
+                                                        {% else %}
+                                                            <option value="{{ author_obj.id }}">{{ author_obj.name }}</option>
+                                                        {% endif %}
+                                                    {% empty %}
+                                                            <option>没有作者</option>
+                                                    {% endfor %}
+                                                </select>
+                                            </p>
+                                            <br>
                                             <p>
                                                 <input type="submit" value="提交" class="btn-success btn">
                                             </p>
@@ -88,10 +50,21 @@
 
 
                                     </div>
-                    </div>
 
-        </div>
-    </div>
-</div>
-</body>
-</html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+{% endblock %}

@@ -1,172 +1,151 @@
-from django.shortcuts import render,HttpResponse,redirect
+from django.shortcuts import render,HttpResponse,redirect,reverse
 from app01 import models
-
 # Create your views here.
 
-user_info = False
-
-# 注册
-def register(request):
-    if request.method == "POST":
-        username = request.POST.get("username")
-        password = request.POST.get("password")
-        models.User.objects.create(username=username,password=password)
-        return redirect('/login/')
-    return render(request,'register.html')
-
+# 主页
+def home(request):
+    return render(request,'home.html')
 
 # 登录
 def login(request):
-    login_status = ''
-    global user_info
-    if request.method == 'POST':
-        username = request.POST.get("username")
-        password = request.POST.get("password")
-        user_obj = models.User.objects.filter(username=username)
-        if not user_obj:
-            return HttpResponse('没有此用户')
-        if password == user_obj[0].password:
-            user_info = True
-            return redirect('/book_list/')
-        else:
-            return HttpResponse('密码错误')
-
     return render(request,'login.html')
+    pass
 
-
-
-# 出版社视图函数
-def publisher_list(request):
-    if not user_info:
-        return redirect('/login/')
-    # 查询全部的记录
-    publisher_list = models.Publisher.objects.all()
-    # 渲染到前端页面
-    return render(request,"publisher_list.html",{'publisher_list':publisher_list})
-
-# 新增出版社
-def add_publisher(request):
-    if not user_info:
-        return redirect('/login/')
+# 注册
+import json
+# from django.core import serializers
+def register(request):
     if request.method == "POST":
-        publisher_name = request.POST.get('publisher_name')
-        models.Publisher.objects.create(name=publisher_name)
-        return redirect('/publisher_list/')
-    return render(request,'add_publisher.html')
+        res = {'flag':False}
+        username = request.POST.get('username')
+        if username == "qinyj":
+            res['flag'] = True
+            return HttpResponse(json.dumps(res))
+        # user_obj = models.User.objects.filter(username=username)
+        # # print(user_obj)
+        # if user_obj:
+        #     res['flag'] = True
+        #     # res = serializers.serialize('json', user_obj)
+        #     return HttpResponse(json.dumps(res))
+        # password = request.POST.get('password')
+        # gender = request.POST.get('gender')
+        # print('gender的值', gender)
+        # models.User.objects.create(username=username,password=password,gender=int(gender))
+        # return redirect(reverse('login'))
+
+    return render(request,'register.html')
+
+
+# 书籍列表
+# from django.core.paginator import Paginator,EmptyPage,PageNotAnInteger
+from app01.utils.mypage import Pagination
+import time
+from django.http import JsonResponse
+def boot_list(request):
+    if request.is_ajax():
+        back_dic = {'code':200,'msg':''}
+        delete_id = request.POST.get('delete_id')
+        time.sleep(1)
+        models.Book.objects.filter(pk=delete_id).delete()
+        back_dic['msg'] = "删除成功"
+        return JsonResponse(back_dic)
+    # # ORM 的循环插入数据更快捷的方法：
+    # book_list = []
+    # for i in range(1000):
+    #     book_list.append(models.Book(title='第%s本书'%i))
+    # models.Book.objects.bulk_create(book_list)
+    # 查询所有的书籍。
+    book_list = models.Book.objects.all()
+    # 自定义分页器的使用
+    current_page = request.GET.get('page',1)
+    all_count = book_list.count()
+    page_obj = Pagination(current_page=current_page,
+                          all_count=all_count,
+                          per_page_num=15,
+                          pager_count=11)
+    # 参数说明：
+    # current_page 当前的页数
+    # all_count 所有的页数
+    # per_page_num 每页显示多少
+    # pager_count 分页器显示的条数
+    page_queryset = book_list[page_obj.start:page_obj.end]
+    return render(request,'book_list.html',locals())
+
+
+# 添加书籍
+def add_book(request):
+    publish_list = models.Publish.objects.all()
+    author_list = models.Author.objects.all()
+    if request.method == "POST":
+        book_name = request.POST.get('book_name')
+        book_price = request.POST.get('book_price')
+        publish_id = request.POST.get('publish_id')
+        author_id = request.POST.getlist('author_id')
+        author_id = [int(x) for x in author_id]
+        book_obj = models.Book.objects.create(title=book_name,
+                                              price=book_price,
+                                              publish_id=publish_id)
+        book_obj.authors.set(author_id)
+        return redirect(reverse('book_list'))
+
+    return render(request,'add_book.html',{'publish_list':publish_list,'author_list':author_list})
+
+# 编辑书籍
+def edit_book(request,edit_id):
+    book_obj = models.Book.objects.filter(pk=edit_id).first()
+    publish_list = models.Publish.objects.all()
+    author_list = models.Author.objects.all()
+    # currentPage = request.GET.get('currentPage')
+    if request.method == "POST":
+        book_name = request.POST.get('book_name')
+        book_price = request.POST.get('book_price')
+        publish_id = request.POST.get('publish_id')
+        author_id = request.POST.getlist('author_id')
+        author_id = [int(x) for x in author_id]
+        # book_obj = models.Book.objects.create(title=book_name,
+        #                                       price=book_price,
+        #                                       publish_id=publish_id)
+        book_obj.authors.set(author_id)
+        return redirect(reverse('book_list'))
+
+    return render(request,'edit_book.html',locals())
+
+# 删除书籍
+def delete_book(request,delete_id):
+    book_obj = models.Book.objects.filter(pk=delete_id).delete()
+    return redirect(reverse('book_list'))
+
+
+# 出版社列表
+def publish_list(request):
+    publish_list = models.Publish.objects.all()
+    return render(request,'publish_list.html',locals())
+
+# 添加出版社
+def add_publish(request):
+    if request.method == "POST":
+        publish_name = request.POST.get('publish_name')
+        publish_addr = request.POST.get('publish_addr')
+        models.Publish.objects.create(name=publish_name,addr=publish_addr)
+        return redirect(reverse('publish_list'))
+    return render(request,'add_publish.html')
 
 # 编辑出版社
-def edit_publisher(request):
-    if not user_info:
-        return redirect('/login/')
-    id = request.GET.get("id")
-    plisher_obj = models.Publisher.objects.filter(id=id)
-
+def edit_publish(request,edit_id):
+    publish_obj = models.Publish.objects.filter(pk=edit_id).first()
+    book_list = models.Book.objects.all()
+    # print(publish_obj.name)
     if request.method == "POST":
-        publisher_name = request.POST.get("publisher_name")
-        models.Publisher.objects.filter(id=id).update(name=publisher_name)
-        return redirect('/publisher_list/')
-    return render(request,'edit_publisher.html',{"plisher_obj":plisher_obj[0]})
+        publish_name = request.POST.get('publish_name')
+        publish_addr = request.POST.get('publish_addr')
+        # book_id_list = request.POST.getlist('book_id')
+        models.Publish.objects.filter(pk=edit_id).update(name=publish_name,addr=publish_addr)
+        # publish_obj.book_set.pri
+        # print(publish_obj.book_set.all().update())
+        return redirect(reverse('publish_list'))
+    return render(request,'edit_publish.html',locals())
 
 # 删除出版社
-def del_publisher(request):
-    id = request.GET.get("id")
-    models.Publisher.objects.filter(id=id).delete()
-    return redirect('/publisher_list/')
-
-# 图书列表
-def book_list(request):
-    if not user_info:
-        return redirect('/login/')
-    book_list = models.Book.objects.all()
-    return render(request,'book_list.html',{"book_list":book_list})
-
-# 新增图书
-def add_book(request):
-    if not user_info:
-        return redirect('/login/')
-    publisher_list = models.Publisher.objects.all()
-    # author_list = models.Author.objects.all()
-    author_list = models.Author.objects.all()
-
-    if request.method == "POST":
-        book_name = request.POST.get("book_name")
-        publisher_id = request.POST.get("publisher_id")
-        # author_id = request.POST.get("author_id")
-
-
-        models.Book.objects.create(name=book_name,publisher_id=publisher_id)
-        # book_obj = models.Book.objects.first()
-        # print(book_obj)
-        return redirect('/book_list/')
-    return render(request,'add_book.html',{"publisher_list":publisher_list,"author_list":author_list})
-
-# 编辑图书
-def edit_book(request):
-    if not user_info:
-        return redirect('/login/')
-    book_id = request.GET.get("book_id")
-    book_obj = models.Book.objects.filter(id=book_id)
-    # book_name = book_obj[0].name
-    publisher_list = models.Publisher.objects.all()
-
-    if request.method == "POST":
-        book_name = request.POST.get("book_name")
-        publisher_id = request.POST.get("publisher_id")
-        models.Book.objects.filter(id=book_id).update(name=book_name,publisher_id=publisher_id)
-        return redirect('/book_list/')
-    return render(request,'edit_book.html',{"book_obj":book_obj[0],"publisher_list":publisher_list})
-
-# 删除图书
-def del_book(request):
-    if not user_info:
-        return redirect('/login/')
-    book_id = request.GET.get("book_id")
-    models.Book.objects.filter(id=book_id).delete()
-    return redirect('/book_list/')
-
-
-# 作者列表
-def author_list(request):
-    if not user_info:
-        return redirect('/login/')
-    author_list = models.Author.objects.all()
-    return render(request,'author_list.html',{"author_list":author_list})
-
-# 新增作者
-def add_author(request):
-    if not user_info:
-        return redirect('/login/')
-    # book_list = models.Book.objects.all()
-    if request.method == "POST":
-        author_name = request.POST.get("author_name")
-        models.Author.objects.create(name=author_name)
-        return redirect('/author_list/')
-    return render(request,'add_author.html')
-
-# 编辑作者
-def edit_author(request):
-    if not user_info:
-        return redirect('/login/')
-    author_id = request.GET.get("author_id")
-    author_obj = models.Author.objects.filter(id=author_id)
-    book_list = models.Book.objects.all()
-
-    if request.method == "POST":
-        author_name = request.POST.get("author_name")
-        book_id = request.POST.getlist("book_id")
-        author_obj[0].name = author_name
-        author_obj[0].book.set(book_id)
-        author_obj[0].save()
-
-        # models.Author.objects.filter(id=author_id).update(name=author_name)
-        return redirect('/author_list/')
-    return render(request,'edit_author.html',{"author_obj":author_obj[0],"book_list":book_list})
-
-
-# 删除作者
-def del_author(request):
-    if not user_info:
-        return redirect('/login/')
-    author_id = request.GET.get("author_id")
-    models.Author.objects.filter(id=author_id).delete()
-    return redirect('/author_list/')
+def delete_publish(request,delete_id):
+    models.Publish.objects.filter(pk=delete_id).delete()
+    return redirect(reverse('publish_list'))
