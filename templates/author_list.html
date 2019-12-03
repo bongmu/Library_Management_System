@@ -2,7 +2,7 @@
 
 {% block table %}
     <!--新增按钮-->
-    <a href="{% url 'add_publish' %}" class="btn btn-success pull-right">新增</a>
+    <a href="{% url 'add_author' %}" class="btn btn-success pull-right">新增</a>
 
     <br>
     <br>
@@ -10,39 +10,40 @@
         <thead>
         <tr>
             <th>序号</th>
-            <th>出版社</th>
-            <th>地址</th>
-            <th>出版书籍</th>
+            <th>作者名字</th>
+            <th>作者名字</th>
+            <th>更多信息</th>
             <th>操作</th>
+
         </tr>
 
         </thead>
 
 
         <tbody>
-        {% for publish_obj in publish_queryset %}
+        {% for author_obj in author_querylist %}
             <tr>
                 <td>{{ forloop.counter }}</td>
-                <td>{{ publish_obj.name }}</td>
-                <td>{{ publish_obj.addr }}</td>
+                <td>{{ author_obj.name }}</td>
+                <td>{{ author_obj.email }}</td>
                 {#                            <td>{{ publish_obj.book_set.all }}</td>#}
-                <td>
-                    {% for book in publish_obj.book_set.all %}
-                        {% if forloop.last %}
-                            <span>"{{ book.title }}"</span>
-                        {% else %}
-                            <span>"{{ book.title }}",</span>
-                        {% endif %}
-                    {% empty %}
-                        <span>暂无书籍!</span>
-                    {% endfor %}
+{#                <td>#}
+{#                    {% for book in publish_obj.book_set.all %}#}
+{#                        {% if forloop.last %}#}
+{#                            <span>"{{ book.title }}"</span>#}
+{#                        {% else %}#}
+{#                            <span>"{{ book.title }}",</span>#}
+{#                        {% endif %}#}
+{#                    {% empty %}#}
+{#                        <span>暂无书籍!</span>#}
+{#                    {% endfor %}#}
+{##}
+{#                </td>#}
 
-                </td>
-
                 <td>
-                    <a href="{% url 'edit_publish' publish_obj.pk %}" class="btn btn-primary">编辑</a>
-                    {#                                <a href="{% url 'delete_publish' publish_obj.pk %}" onclick="return confirm('是否要删除？')" class="btn btn-danger">删除</a>#}
-                    <a href="#" class="btn btn-danger del" delete_id="{{ publish_obj.id }}">删除</a>
+                    <a href="#" class="btn btn-primary">编辑</a>
+{#        <a href="{% url 'delete_publish' publish_obj.pk %}" onclick="return confirm('是否要删除？')" class="btn btn-danger">删除</a>#}
+                    <a href="#" class="btn btn-danger del" delete_id="{{ author_obj.id }}">删除</a>
                 </td>
             </tr>
         {% empty %}

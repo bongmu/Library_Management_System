@@ -1,0 +1,33 @@
+{% extends 'home.html' %}
+
+
+{% block content %}
+
+    {#            面板开始  #}
+    <div class="panel panel-primary">
+              <div class="panel-heading ">
+                <h3 class="panel-title">图书管理系统 <span class="glyphicon glyphicon-book pull-right"></span></h3>
+              </div>
+      <div class="panel-body">
+
+
+
+            <div class="panel-body">
+                                        <form action="" method="post" class="form-horizontal">
+                                            <p>
+                                                作者名：<input type="text" class="form-control" name="author_name" placeholder="作者名">
+                                            </p>
+                                            <p>
+                                                作者email：<input type="text" class="form-control" name="author_email" placeholder="作者email">
+                                            </p>
+                                            <br>
+                                            <p>
+                                                <input type="submit" value="提交" class="btn-success btn">
+                                            </p>
+                                        </form>
+
+
+
+            </div>
+
+{% endblock %}

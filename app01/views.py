@@ -50,10 +50,10 @@ def boot_list(request):
         back_dic['msg'] = "删除成功"
         return JsonResponse(back_dic)
     # # ORM 的循环插入数据更快捷的方法：
-    # book_list = []
-    # for i in range(1000):
-    #     book_list.append(models.Book(title='第%s本书'%i))
-    # models.Book.objects.bulk_create(book_list)
+    book_list = []
+    for i in range(1000):
+        book_list.append(models.Book(title='第%s本书'%i,price=100,publish_id=100))
+    models.Book.objects.bulk_create(book_list)
     # 查询所有的书籍。
     book_list = models.Book.objects.all()
     # 自定义分页器的使用
@@ -110,15 +110,26 @@ def edit_book(request,edit_id):
 
     return render(request,'edit_book.html',locals())
 
-# 删除书籍
-def delete_book(request,delete_id):
-    book_obj = models.Book.objects.filter(pk=delete_id).delete()
-    return redirect(reverse('book_list'))
+# # 删除书籍
+# def delete_book(request,delete_id):
+#     book_obj = models.Book.objects.filter(pk=delete_id).delete()
+#     return redirect(reverse('book_list'))
 
 
 # 出版社列表
 def publish_list(request):
+    if request.is_ajax():
+        delete_id = request.POST.get('delete_id')
+        back_dict = {'code':200,'msg':''}
+        time.sleep(1)
+        models.Publish.objects.filter(pk=delete_id).delete()
+        back_dict['msg'] = "删除成功"
+        return JsonResponse(back_dict)
     publish_list = models.Publish.objects.all()
+    current_page = request.GET.get('page',1)
+    all_count = publish_list.count()
+    page_obj = Pagination(current_page=current_page,all_count=all_count,per_page_num=10,pager_count=11)
+    publish_queryset = publish_list[page_obj.start:page_obj.end]
     return render(request,'publish_list.html',locals())
 
 # 添加出版社
@@ -145,7 +156,39 @@ def edit_publish(request,edit_id):
         return redirect(reverse('publish_list'))
     return render(request,'edit_publish.html',locals())
 
-# 删除出版社
-def delete_publish(request,delete_id):
-    models.Publish.objects.filter(pk=delete_id).delete()
-    return redirect(reverse('publish_list'))
+# # 删除出版社
+# def delete_publish(request,delete_id):
+#     models.Publish.objects.filter(pk=delete_id).delete()
+#     return redirect(reverse('publish_list'))
+
+
+# 作者列表
+def author_list(request):
+    # l1 = []
+    # for i in range(1000):
+    #     l1.append(models.Author(name='作者%s'%i,email='%s%s%s%s@example.com'%(i,i,i,i)))
+    #     # l1.append(models.AuthorDetail(phone='1321324%s'%i,add='上海'))
+    # # models.AuthorDetail.objects.bulk_create(l1)
+    # models.Author.objects.bulk_create(l1)
+
+    author_list = models.Author.objects.all()
+    current_page = request.GET.get('page',1)
+    all_count = author_list.count()
+    page_obj = Pagination(current_page=current_page,all_count=all_count,per_page_num=10,pager_count=11)
+    author_querylist = author_list[page_obj.start:page_obj.end]
+    if request.is_ajax():
+        delete_id = request.POST.get('delete_id')
+        back_dict = {'code':200,'msg':''}
+        models.Author.objects.filter(pk=delete_id).delete()
+        back_dict['msg'] = '删除成功'
+        return JsonResponse(back_dict)
+    return render(request,'author_list.html',locals())
+
+# 添加作者
+def add_author(request):
+    if request.method == 'POST':
+        author_name = request.POST.get('author_name')
+        author_email = request.POST.get('author_email')
+        models.Author.objects.create(name=author_name,email=author_email)
+        return redirect(reverse('author_list'))
+    return render(request,'add_author.html')
